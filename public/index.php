@@ -20,12 +20,8 @@ define('LARAVEL_START', microtime(true));
 | loading any of our classes later on. It feels great to relax.
 |
 */
-// $user = new \App\User();
-// dd($user);
 
 require __DIR__.'/../vendor/autoload.php';
-// $user = new \App\User();
-// dd($user);
 
 /*
 |--------------------------------------------------------------------------
@@ -41,20 +37,6 @@ require __DIR__.'/../vendor/autoload.php';
 
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
-// Извлекаем значение $_GET['user'], а если оно не задано,
-// то возвращаем 'nobody'
-// $username = $_GET['user'] ?? 'nobody';
-// dd($username);
-
-// dd($_ENV['APP_BASE_PATH']);
-// dd(dirname(__DIR__));
-
-// Класс приложения наследуется от сервис-контейнера:
-// class Application extends Container implements ApplicationContract, HttpKernelInterface
-
-// таким образом из объекта приложения ($app) можно получить доступ ко всем сервисам, которые регистрируются в сервис-контейнере. Например выполнив:
-// dd(app('router'));
-
 /*
 |--------------------------------------------------------------------------
 | Run The Application
@@ -67,50 +49,12 @@ $app = require_once __DIR__.'/../bootstrap/app.php';
 |
 */
 
-
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
-
-// Выведем на экран свойства данного объекта дописав следующей строкой:
-// dd($kernel);
-
-
-// вызывается метод handle() класса Illuminate\Foundation\Http\Kernel из файла vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php, который занимается обработкой входящего запроса:
-// dd($request);
 
 $response = $kernel->handle(
     $request = Illuminate\Http\Request::capture()
 );
 
-
-// Получив приложение, мы можем обработать входящий запрос через ядро и отправить соответствующий ответ обратно в браузер клиента, что позволит им насладиться креативным и замечательным приложением, которое мы для него подготовили.
-// dd($response);
-
 $response->send(); // отправляет HTTP-заголовки и контент.
 
-
 $kernel->terminate($request, $response); // завершает работу приложения. 
-
-
-// $env = env('APP_ENV');
-// dd($env);
-// Returns 'production' if APP_ENV is not set...
-// $env = env('APP_ENV', 'production');
-// dd($env);
-
-// $environment = App::environment();
-// dd($environment);
-
-if (App::environment('local')) {
-    // The environment is local
-}
-
-if (App::environment(['local', 'staging'])) {
-    // The environment is either local OR staging...
-}
-config(['app.timezone' => 'Europe/Kiev']);
-$value = config('app.timezone');
-dd($value);
-
-$time_end = microtime(true);
-$time = $time_end - LARAVEL_START;
-echo "Выполнено за $time секунд";
