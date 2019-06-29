@@ -21,23 +21,21 @@ class PostController extends Controller
 
     public function index()
     {
-        $posts = DB::table('posts')->get();
-
+        // $posts = DB::table('posts')->get();
         $count = DB::table('posts')->count();
-        // $maxId = DB::table('posts')->max('id');
-
-        // return view('blog.index', ['posts' => $posts, 'title'=>'Peculiar Blog']);
-        return view('blog.index', ['posts' => $posts, 'title'=>'Peculiar Blog', 'count'=>$count]);
-
+        $posts = DB::table('posts')->paginate(4);
+        // $posts = DB::table('posts')->simplePaginate(10);
+        
+        // return view('blog.index', ['posts' => $posts, 'title'=>'Peculiar Blog', 'count'=>$count]);
+        return view('blog.index3', compact('posts'))->withTitle('Peculiar Blog');
     }
 
     public function show($id)
     {
-        // $post = DB::select("select * from posts where id = :id", ['id' => $id])[0];
-        // $post = DB::table('posts')->where('id', $id)->first();
-        $post = DB::table('posts')->where('id', $id)->value('title');
-        return $post;
-        // $post = DB::table('posts')->find($id);
+        $post = DB::table('posts')->find($id);
+        
         // return view('blog.show', ['post' => $post]);
+        return view('blog.show', ['post' => $post, 'hasComments'=>false]);
+        
     }
 }
