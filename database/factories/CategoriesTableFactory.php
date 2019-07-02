@@ -1,0 +1,14 @@
+<?php
+
+/* @var $factory \Illuminate\Database\Eloquent\Factory */
+
+use App\Category;
+use Faker\Generator as Faker;
+
+$factory->define(Category::class, function (Faker $faker) {
+    return [
+        'name' => $faker->word(),
+        'description' => $faker->sentence(),
+        'active' => $faker->randomElement($array = array ('yes','no'))
+     ];
+});
