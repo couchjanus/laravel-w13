@@ -21,7 +21,8 @@ Route::get('/', function () {
 
 
 Route::get('blog', ['uses' => 'PostController@index', 'as' => 'blog']);
-Route::get('blog/{id}', ['uses' => 'PostController@show', 'as' => 'show']);
+// Route::get('blog/{id}', ['uses' => 'PostController@show', 'as' => 'show']);
+Route::get('blog/{slug}', 'PostController@show')->name('blog.show');
 
 // Route::resource(
 //     'blog', 'PostController', [
@@ -36,11 +37,6 @@ Route::get('blog/{id}', ['uses' => 'PostController@show', 'as' => 'show']);
 //         ]
 //     ]
 // );
-
-
-Route::get('/login', function () {
-    return 'login';
-})->name('login');
 
 Route::get('admin', 'Admin\DashboardController@index');
 Route::resource('posts', 'Admin\PostController');
@@ -59,5 +55,9 @@ Route::prefix('admin')->group(function () {
     Route::resource('users', 'Admin\UserController');
 });
 
-
  
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
+
+Route::get('test', 'HomeController@showRequest');

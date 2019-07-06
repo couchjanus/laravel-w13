@@ -1,8 +1,12 @@
 @extends('layouts.admin')
 
+<!-- Breadcrumbs-->
+@section('breadcrumb')
+  @include('layouts.partials.admin._breadcrumb')
+@endsection
 @section('content')
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-        <h1 class="h2">Add New Post</h1>
+        <h1 class="h2">{{ $title }}</h1>
         <div class="btn-toolbar mb-2 mb-md-0">
           <div class="btn-group mr-2">
             <a href="{{ route('posts.index') }}" title="All posts">
@@ -18,15 +22,28 @@
           </button>
         </div>
     </div>
-
-    <div class="table-responsive">
-        <form action="{{ route('posts.store') }}" method="post">
+    
+    @if (Session::get('errors') != Null)
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            {{  $errors->first() }}
+        </div>
+    @endif
+  
+    
+    <form action="{{ route('posts.store') }}" method="post">
             @csrf
             <div class="card">
                 <div class="card-block">
                     <div class="form-group">
                         <label for="title">Title</label>
                         <input name="title" class="form-control" type="text" value="" required>
+                        @error('title')
+                            <div class="alert alert-danger">{{ $message }}</div>
+                        @enderror
+
                     </div>
 
                     <div class="form-group">
@@ -60,6 +77,6 @@
                     </div>
                 </div>
             </div>
-        </form>
-    </div>
+    </form>
+    
 @endsection

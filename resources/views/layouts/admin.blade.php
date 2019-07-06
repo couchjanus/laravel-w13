@@ -22,11 +22,10 @@
 <div id="wrapper">
     <!-- Sidebar -->
     @include('layouts.partials.admin._sidebar')
-       
     <div id="content-wrapper">
         <div class="container-fluid">
-            
             @yield('breadcrumb')
+            @include('layouts.partials.admin._flash-message')
             @yield('content')
         </div><!-- /.container-fluid -->
         <!-- Sticky Footer -->

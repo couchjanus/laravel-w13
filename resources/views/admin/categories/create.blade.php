@@ -23,15 +23,28 @@
       </div>
   </div>
 
-  <div class="table-responsive">
-
-    <form action="{{ route('categories.store') }}" method="post">
+  @if ($errors->any())
+     <div class="alert alert-danger">
+         <ul>
+             @foreach ($errors->all() as $error)
+                 <li>{{ $error }}</li>
+             @endforeach
+         </ul>
+     </div>
+  @endif
+  
+  <form action="{{ route('categories.store') }}" method="post">
       @csrf
       <div class="card">
         <div class="card-block">
           <div class="form-group">
             <label for="title">Category Name:</label>
             <input name="name" class="form-control" type="text" placeholder="Enter name" required>
+            @if($errors->has('name'))
+               <p class="alert alert-danger">
+                   {{ $errors->first('name') }}
+               </p>
+            @endif
           </div>
         </div>
         <div class="card-block">
@@ -53,6 +66,6 @@
         </div>
                 
       </div>
-    </form>
-  </div>
+  </form>
+
 @endsection  

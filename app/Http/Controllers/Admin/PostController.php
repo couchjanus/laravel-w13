@@ -8,6 +8,12 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Enums\PostStatusType;
 
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+
+use App\Http\Requests\PostUpdateFormRequest;
+use App\Http\Requests\PostStoreFormRequest;
+
 class PostController extends Controller
 {
     /**
@@ -18,7 +24,6 @@ class PostController extends Controller
     public function index()
     {
         $posts = Post::paginate();
-        // dump($posts);
         $breadcrumbItem = 'Posts';
         $title = 'Posts management';
         $order = 'asc'; 
@@ -28,7 +33,6 @@ class PostController extends Controller
     }
     public function getPostsByStatus(Request $request)
     {
-        // dump($request);
         static $statusPost;
         $breadcrumbItem = 'Posts By Status';
         $title = 'Posts management';
@@ -36,7 +40,6 @@ class PostController extends Controller
         // $posts = Post::whereStatus($request->status)->paginate();
         $statusPost = $request->status; 
         $posts = Post::status($statusPost)->paginate(5);
-        // dump($posts);
         return view('admin.posts.status', compact('posts', 'status', 'statusPost', 'breadcrumbItem', 'title'));
     }
 
@@ -101,9 +104,12 @@ class PostController extends Controller
      */
     public function create()
     {
+        // dd(\Auth::id());
+        
         $categories = Category::all(); 
-        $status = StatusType::toSelectArray(); 
-        return view('admin.posts.create')->withStatus($status)->withCategories($categories);
+        $status = PostStatusType::toSelectArray();
+        
+        return view('admin.posts.create')->withStatus($status)->withCategories($categories)->withTitle('Posts management')->withBreadcrumbItem('Add New Post');
     }
 
     /**
@@ -112,13 +118,32 @@ class PostController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    // public function store(Request $request)
+    // {
+    //     $this->validate($request, [
+    //         'title' => 'bail|required|unique:posts|max:255',
+    //         'content' => 'required',
+    //     ]);
+        
+    //     $userId = \Auth::id() ?? 1;
+
+    //     $post = Post::firstOrCreate(['title' => $request->title, 'content'=>$request->content, 'status'=>$request->status, 'category_id'=>$request->category_id, 'user_id'=>$userId]);
+        
+    //     return redirect(route('posts.index'));
+    // }
+    
+    // PostStoreFormRequest
+
+    public function store(PostStoreFormRequest $request)
     {
-        // Получить post или создать, если не существует...
-        $post = Post::firstOrCreate(['title' => $request->title, 'content'=>$request->content, 'status'=>$request->status, 'category_id'=>$request->category_id, 'user_id'=>1]);
+        $userId = \Auth::id() ?? 1;
+
+        $post = Post::firstOrCreate(['title' => $request->title, 'content'=>$request->content, 'status'=>$request->status, 'category_id'=>$request->category_id, 'user_id'=>$userId]);
+        
         return redirect(route('posts.index'));
     }
 
+    
     /**
      * Display the specified resource.
      *
@@ -153,8 +178,8 @@ class PostController extends Controller
     public function edit(Post $post)
     {
         $categories = Category::pluck('name', 'id'); 
-        $status = StatusType::toSelectArray(); 
-        return view('admin.posts.edit')->withPost($post)->withStatus($status)->withCategories($categories);
+        $status = PostStatusType::toSelectArray(); 
+        return view('admin.posts.edit')->withPost($post)->withStatus($status)->withCategories($categories)->withTitle('Posts management')->withBreadcrumbItem('Edit Post');
     }
 
     /**
@@ -164,15 +189,45 @@ class PostController extends Controller
      * @param  \App\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Post $post)
-    {
-        // $post->updated_at = '2019-01-01 10:00:00';
-        // $post->save(['timestamps' => false]);
+    // public function update(Request $request, Post $post)
+    // {
+    //     // $post->updated_at = '2019-01-01 10:00:00';
+    //     // $post->save(['timestamps' => false]);
 
-        // Если подходящей модели нет, создать новую.
-        $post->updateOrCreate(['title' => $request->title, 'content'=>$request->content, 'status'=>$request->status, 'category_id'=>$request->category_id, 'user_id'=>1]);
+    //     $messages = [
+    //         'required' => 'The :attribute field is required.',
+    //     ];
+
+    //     // $messages = [
+    //     //     'same'    => 'The :attribute and :other must match.',
+    //     //     'size'    => 'The :attribute must be exactly :size.',
+    //     //     'between' => 'The :attribute value :input is not between :min - :max.',
+    //     //     'in'      => 'The :attribute must be one of the following types: :values',
+    //     // ];
+        
+
+    //     Validator::make($request, [
+    //         'title' => [
+    //             'required',
+    //             Rule::unique('posts')->ignore($post->id),
+    //         ]
+    //     ],
+    //     $messages);
+        
+    //     // Если подходящей модели нет, создать новую.
+    //     $post->updateOrCreate(['title' => $request->title, 'content'=>$request->content, 'status'=>$request->status, 'category_id'=>$request->category_id, 'user_id'=>1]);
+    //     return redirect(route('posts.index'));
+    // }
+
+
+    // PostUpdateFormRequest
+
+    public function update(PostUpdateFormRequest $request, Post $post)
+    {
+        $post->update(['title' => $request->title, 'content'=>$request->content, 'status'=>$request->status, 'category_id'=>$request->category_id, 'user_id'=>1]);
         return redirect(route('posts.index'));
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -182,6 +237,8 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //
+        $post->delete();
+        return redirect()->route('posts.index')
+                ->with('success','Post deleted successfully');
     }
 }

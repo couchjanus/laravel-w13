@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 use DB;
-
+use App\Post;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -30,12 +30,23 @@ class PostController extends Controller
         return view('blog.index3', compact('posts'))->withTitle('Peculiar Blog');
     }
 
-    public function show($id)
+    // public function show($id)
+    // {
+    //     $post = DB::table('posts')->find($id);
+        
+    //     // return view('blog.show', ['post' => $post]);
+    //     return view('blog.show', ['post' => $post, 'hasComments'=>false]);
+        
+    // }
+
+    public function show($slug)
     {
-        $post = DB::table('posts')->find($id);
+        if (is_numeric($slug)) {
+            $post = Post::findOrFail($slug);
+            return Redirect::to(route('blog.show', $post->slug), 301);
+        }
         
-        // return view('blog.show', ['post' => $post]);
-        return view('blog.show', ['post' => $post, 'hasComments'=>false]);
-        
+        $post = Post::whereSlug($slug)->firstOrFail();
+        return view('blog.show', ['post' => $post, 'hasComments'=>true]);
     }
 }

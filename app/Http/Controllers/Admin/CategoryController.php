@@ -6,6 +6,8 @@ use App\Category;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
+use Illuminate\Support\Facades\Validator;
+
 class CategoryController extends Controller
 {
     /**
@@ -15,13 +17,12 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        // return "Category controller";
-        // $categories = Category::all();
+    
         $breadcrumbItem = 'Categories';
         $title = 'Categories management';
         $order = 'asc'; 
         $categories = Category::paginate();
-        // $categories = Category::paginate(10);
+        
         return view('admin.categories.index', compact('categories', 'breadcrumbItem', 'title', 'order'));
     }
 
@@ -43,15 +44,40 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        // Создание нового экземпляра
-        // $category = new Category;
-        // $category->name = $request->name;
-        // $category->description = $request->description;
-        // $category->save();
-        
-        // $category->fill(['name' => $request->name, 'description' => $request->description]);
+        $this->validate($request, [
+            'name' => 'required|unique:categories|max:50',
+            'description' => 'nullable|string',
+        ]);
 
-        // $category = App\Category::create(['name' =>$request->name, ‘description’ => $request->description]);
+        // $validator = Validator::make($request->all(), [
+        //     'name' => 'required|unique:categories|max:255',
+        //     'description' => 'nullable|string',
+        // ]);
+
+        // Переданные данные не прошли проверку
+        // if ($validator->fails()) {
+        //     return redirect('admin/categories/create')
+        //             ->withErrors($validator)
+        //             ->withInput();
+        // }
+
+        // if ($validator->fails())
+        // {
+        //     // Переданные данные не прошли проверку
+        //     return back()->withErrors($validator->messages()->first());
+        // }
+
+        // $validator->after(function ($validator) {
+        //     if ($this->somethingElseIsInvalid()) {
+        //         $validator->errors()->add('name', 'Something is wrong with this field!');
+        //     }
+        // });
+
+        // if ($validator->fails()) {
+        //     return redirect('admin/categories/create')
+        //         ->withErrors($validator)
+        //         ->withInput();
+        // }
 
         Category::create($request->all());
         return redirect(route('categories.index'));
@@ -89,6 +115,12 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|unique:categories|max:255',
+            'description' => 'nullable|string',
+        ])->validate();
+ 
         $category->update($request->all());
         return redirect()->route('categories.index');
     }

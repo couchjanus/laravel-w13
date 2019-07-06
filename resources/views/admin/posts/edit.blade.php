@@ -1,5 +1,8 @@
 @extends('layouts.admin')
-
+<!-- Breadcrumbs-->
+@section('breadcrumb')
+  @include('layouts.partials.admin._breadcrumb')
+@endsection
 @section('content')
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
         <h1 class="h2">Edit Post</h1>
@@ -18,10 +21,8 @@
           </button>
         </div>
     </div>
-
-    <div class="table-responsive">
-
-        <form action="{{ route('posts.update',['id' => $post->id]) }}" method="post">
+    
+    <form action="{{ route('posts.update',['id' => $post->id]) }}" method="post">
             @csrf
             @method("PUT")
             <div class="card">
@@ -71,6 +72,6 @@
                     </div>
                 </div>
             </div>
-        </form>
-    </div>
+    </form>
+    
 @endsection

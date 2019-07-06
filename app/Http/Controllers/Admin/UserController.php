@@ -6,6 +6,12 @@ use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+
+use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\UserStoreFormRequest;
+
 class UserController extends Controller
 {
     /**
@@ -42,7 +48,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.users.create')->withTitle('Users Management')->withBreadcrumbItem('Add User');
     }
 
     /**
@@ -51,11 +57,36 @@ class UserController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        //
-    }
+    // public function store(Request $request)
+    // {
+    //     $messages = [
+    //         'email.required' => 'We need to know your e-mail address!',
+    //     ];
+        
+    //     $this->validate($request, [
+    //         'name' => ['required', 'string', 'max:50', 'min:3'],
+    //         'email' => ['required', 'string', 'email', 'max:50', 'unique:users'],
+    //         'password' => ['required', 'string', 'min:8'],
+    //     ], $messages);
 
+    //     return User::create([
+    //         'name' => $request['name'],
+    //         'email' => $request['email'],
+    //         'password' => Hash::make($request['password']),
+    //     ]);
+    // }
+
+    // UserStoreFormRequest
+    
+    public function store(UserStoreFormRequest $request)
+    {
+        return User::create([
+            'name' => $request['name'],
+            'email' => $request['email'],
+            'password' => Hash::make($request['password']),
+        ]);
+        return redirect()->route('users.index')->with('success','User created successfully');;
+    }
     /**
      * Display the specified resource.
      *
@@ -64,7 +95,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        //
+        return view('admin.users.show')->withUser($user)->withTitle('Users Management')->withBreadcrumbItem('Show User');
     }
 
     /**
@@ -75,8 +106,16 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        //
+        return view('admin.users.edit')->withUser($user)->withTitle('Users Management')->withBreadcrumbItem('Edit User');
     }
+ 
+    // public function rules() {
+    //    return [
+    //         'email' => ['required', 'string', 'email', 'max:255',
+    //             Rule::unique('users')->ignore($this->user),
+    //         ],
+    //     ];
+    // }
 
     /**
      * Update the specified resource in storage.
@@ -87,7 +126,17 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        //
+        $this->validate($request, [
+            'name' => ['required', 'string', 'max:255'],
+            'password' => ['required', 'string', 'min:8'],
+            'email' => [
+                'required', 'string', 'email', 'max:255',
+                Rule::unique('users')->ignore($user->id),
+            ],
+        ]);
+
+        $user->update($request->all());
+        return redirect()->route('users.index');
     }
 
     /**
