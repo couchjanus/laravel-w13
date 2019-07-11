@@ -15,4 +15,10 @@ class Category extends Model
 
     protected $dates = ['created_at', 'deleted_at']; // which fields will be Carbon-ized
 
+    public function posts()
+    {
+        // Получить статьи блога.
+        return $this->hasMany(Post::class);
+    }
+
 }

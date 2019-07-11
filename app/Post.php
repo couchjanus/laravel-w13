@@ -20,11 +20,11 @@ class Post extends Model
     public $timestamps = true;
    
     // global scopes
-    protected static function boot()
-    {
-        parent::boot();
-        static::addGlobalScope(new TitleScope);
-    }
+    // protected static function boot()
+    // {
+    //     parent::boot();
+    //     static::addGlobalScope(new TitleScope);
+    // }
 
     use Sluggable;
 
@@ -55,4 +55,20 @@ class Post extends Model
         return $query->where('status', $status);
     }
     
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function user()
+    {
+       return $this->belongsTo(User::class);
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class);
+    }
+
+
 }

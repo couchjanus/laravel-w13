@@ -60,4 +60,9 @@ class User extends Authenticatable
         return $query->withTrashed()->where('id', $id)->first();       
     }
 
+    public function profile()
+    {
+        return $this->hasOne(Profile::class);
+    }
+
 }

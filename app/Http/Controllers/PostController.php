@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
-use DB;
 use App\Post;
 use Illuminate\Http\Request;
+use App\Enums\PostStatusType;
 
 class PostController extends Controller
 {
@@ -12,32 +12,13 @@ class PostController extends Controller
      *
      * @return Response
      */
-    // public function index()
-    // {
-    //     $posts = DB::select('select * from posts');
-    //     return $posts;
-    //     // return view('blog.index', ['posts' => $posts, 'title'=>'Peculear Blog']);
-    // }
 
     public function index()
     {
-        // $posts = DB::table('posts')->get();
-        $count = DB::table('posts')->count();
-        $posts = DB::table('posts')->paginate(4);
-        // $posts = DB::table('posts')->simplePaginate(10);
-        
-        // return view('blog.index', ['posts' => $posts, 'title'=>'Peculiar Blog', 'count'=>$count]);
-        return view('blog.index3', compact('posts'))->withTitle('Peculiar Blog');
+        $posts = Post::where([
+            'status' => PostStatusType::Published])->paginate();
+        return view('blog.index', compact('posts'))->withTitle('Peculiar Blog');
     }
-
-    // public function show($id)
-    // {
-    //     $post = DB::table('posts')->find($id);
-        
-    //     // return view('blog.show', ['post' => $post]);
-    //     return view('blog.show', ['post' => $post, 'hasComments'=>false]);
-        
-    // }
 
     public function show($slug)
     {
@@ -49,4 +30,16 @@ class PostController extends Controller
         $post = Post::whereSlug($slug)->firstOrFail();
         return view('blog.show', ['post' => $post, 'hasComments'=>true]);
     }
+
+    public function getPostsByCategory($categoryId)
+    {
+        $posts = Post::where([
+                'status' => PostStatusType::Published, 
+                'category_id' => $categoryId])
+            ->with('category')
+            ->orderBy('updated_at', 'desc')
+            ->paginate();
+        return view('blog.index')->with(compact('posts'))->withTitle('Awesome Blog');
+    }
+
 }

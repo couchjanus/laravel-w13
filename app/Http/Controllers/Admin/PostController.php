@@ -54,40 +54,7 @@ class PostController extends Controller
        
         return view('admin.posts.index', compact('posts', 'status', 'order', 'breadcrumbItem', 'title'));
     }
-    public function testIds()
-    {
-        // $ids = [1, 2, 3];
-        // $result = $this->getByIds($ids);
-
-        // $result = Post::where('id', '>', 40)->take(10)->get();
-
-        // $result = Post::where([
-        //     ['id','>', 40],
-        //     ['status', '=', 1],
-        // ])->get();
-        
-        // $result = Post::where('category_id', 1)->get();
-        // это:
-        // $result = Post::whereCategoryId(3)->get();
-
-        // $result = Post::whereDate('created_at', date('Y-m-d'));
-        // $result = Post::whereDay('created_at', date('d'));
-        // $result = Post::whereMonth('created_at', date('m'));
-        // $result = Post::whereYear('created_at', date('2019'))->get();
-
-        // $result = Post::where('id', 1);
-        // $result = Post::orWhere('id', 2);
-        // $result = Post::orWhere('id', 3);
-
-        // Вы можете сделать это так:
-        
-        // $result = Post::where('id', 1)->orWhere(['id' => 2, 'id' => 3])->get();
-
-
-        dump($result);
-    }
-
-
+    
     public function getByIds($ids)
     {
         // Можно вызвать метод findMany с массивом первичных ключей,
@@ -107,9 +74,10 @@ class PostController extends Controller
         // dd(\Auth::id());
         
         $categories = Category::all(); 
+        $tags = \App\Tag::all();//get()->pluck('name', 'id');
         $status = PostStatusType::toSelectArray();
         
-        return view('admin.posts.create')->withStatus($status)->withCategories($categories)->withTitle('Posts management')->withBreadcrumbItem('Add New Post');
+        return view('admin.posts.create')->withStatus($status)->withCategories($categories)->withTitle('Posts management')->withBreadcrumbItem('Add New Post')->withTags($tags);
     }
 
     /**
@@ -118,29 +86,14 @@ class PostController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    // public function store(Request $request)
-    // {
-    //     $this->validate($request, [
-    //         'title' => 'bail|required|unique:posts|max:255',
-    //         'content' => 'required',
-    //     ]);
-        
-    //     $userId = \Auth::id() ?? 1;
-
-    //     $post = Post::firstOrCreate(['title' => $request->title, 'content'=>$request->content, 'status'=>$request->status, 'category_id'=>$request->category_id, 'user_id'=>$userId]);
-        
-    //     return redirect(route('posts.index'));
-    // }
-    
-    // PostStoreFormRequest
 
     public function store(PostStoreFormRequest $request)
     {
         $userId = \Auth::id() ?? 1;
 
         $post = Post::firstOrCreate(['title' => $request->title, 'content'=>$request->content, 'status'=>$request->status, 'category_id'=>$request->category_id, 'user_id'=>$userId]);
-        
-        return redirect(route('posts.index'));
+        $post->tags()->sync((array)$request->input('tag'));  
+        return redirect()->route('posts.index')->with('success','Post created successfully');;
     }
 
     
@@ -179,7 +132,8 @@ class PostController extends Controller
     {
         $categories = Category::pluck('name', 'id'); 
         $status = PostStatusType::toSelectArray(); 
-        return view('admin.posts.edit')->withPost($post)->withStatus($status)->withCategories($categories)->withTitle('Posts management')->withBreadcrumbItem('Edit Post');
+        $tags = \App\Tag::get()->pluck('name', 'id');
+        return view('admin.posts.edit')->withPost($post)->withStatus($status)->withCategories($categories)->withTitle('Posts management')->withBreadcrumbItem('Edit Post')->withTags($tags);
     }
 
     /**
@@ -189,43 +143,12 @@ class PostController extends Controller
      * @param  \App\Post  $post
      * @return \Illuminate\Http\Response
      */
-    // public function update(Request $request, Post $post)
-    // {
-    //     // $post->updated_at = '2019-01-01 10:00:00';
-    //     // $post->save(['timestamps' => false]);
-
-    //     $messages = [
-    //         'required' => 'The :attribute field is required.',
-    //     ];
-
-    //     // $messages = [
-    //     //     'same'    => 'The :attribute and :other must match.',
-    //     //     'size'    => 'The :attribute must be exactly :size.',
-    //     //     'between' => 'The :attribute value :input is not between :min - :max.',
-    //     //     'in'      => 'The :attribute must be one of the following types: :values',
-    //     // ];
-        
-
-    //     Validator::make($request, [
-    //         'title' => [
-    //             'required',
-    //             Rule::unique('posts')->ignore($post->id),
-    //         ]
-    //     ],
-    //     $messages);
-        
-    //     // Если подходящей модели нет, создать новую.
-    //     $post->updateOrCreate(['title' => $request->title, 'content'=>$request->content, 'status'=>$request->status, 'category_id'=>$request->category_id, 'user_id'=>1]);
-    //     return redirect(route('posts.index'));
-    // }
-
-
-    // PostUpdateFormRequest
 
     public function update(PostUpdateFormRequest $request, Post $post)
     {
         $post->update(['title' => $request->title, 'content'=>$request->content, 'status'=>$request->status, 'category_id'=>$request->category_id, 'user_id'=>1]);
-        return redirect(route('posts.index'));
+        $post->tags()->sync((array)$request->input('tag'));
+        return redirect()->route('posts.index')->with('success','Post updated successfully');
     }
 
 
@@ -237,6 +160,7 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
+        $post->tags()->detach();
         $post->delete();
         return redirect()->route('posts.index')
                 ->with('success','Post deleted successfully');

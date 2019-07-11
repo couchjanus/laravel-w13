@@ -12,6 +12,8 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\UserStoreFormRequest;
 
+use App\Profile;
+
 class UserController extends Controller
 {
     /**
@@ -57,34 +59,18 @@ class UserController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    // public function store(Request $request)
-    // {
-    //     $messages = [
-    //         'email.required' => 'We need to know your e-mail address!',
-    //     ];
-        
-    //     $this->validate($request, [
-    //         'name' => ['required', 'string', 'max:50', 'min:3'],
-    //         'email' => ['required', 'string', 'email', 'max:50', 'unique:users'],
-    //         'password' => ['required', 'string', 'min:8'],
-    //     ], $messages);
-
-    //     return User::create([
-    //         'name' => $request['name'],
-    //         'email' => $request['email'],
-    //         'password' => Hash::make($request['password']),
-    //     ]);
-    // }
-
-    // UserStoreFormRequest
     
     public function store(UserStoreFormRequest $request)
     {
-        return User::create([
+        $user = User::create([
             'name' => $request['name'],
             'email' => $request['email'],
             'password' => Hash::make($request['password']),
         ]);
+        
+        $profile = new Profile();
+        $user->profile()->save($profile);
+        
         return redirect()->route('users.index')->with('success','User created successfully');;
     }
     /**

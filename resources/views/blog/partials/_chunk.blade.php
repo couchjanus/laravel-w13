@@ -5,9 +5,9 @@
         <div class="post-details">
           <div class="post-meta d-flex justify-content-between">
             <div class="date meta-last">{{ $post->created_at }}</div>
-            <div class="category"><a href="#">{{ $post->category_id }}</a></div>
+            <div class="category"><a href="{{ route('blog.category', $post->category_id) }}">{{ $post->category->name }}</a></div>
           </div>
-          <a href="/blog/{{ $post->slug }}">
+          <a href="{{ route('blog.show', $post->slug) }}">
             <h3 class="h4">{{ $post->title }}</h3>
           </a>
           
@@ -18,7 +18,7 @@
               <div class="avatar">
                 <img src="images/user.svg" alt="..." class="img-fluid">
               </div>
-              <div class="title"><span>{{ $post->user_id }}</span></div>
+              <div class="title"><span>{{ $post->user->name }}</span></div>
             </a>
             <div class="date"><i class="fas fa-clock"></i> 2 months ago</div>
             <div class="comments meta-last"><i class="fas fa-comment"></i> 12</div>
