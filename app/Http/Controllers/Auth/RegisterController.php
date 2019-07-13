@@ -73,4 +73,9 @@ class RegisterController extends Controller
         $user->profile()->save(new Profile);
         return $user;
     }
+
+    public function requestInvitation() {
+        return view('auth.request');
+    }
+
 }

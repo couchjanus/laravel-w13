@@ -11,12 +11,12 @@ class Profile extends Model
         'last_name',
         'location',
         'bio',
+        'username',
+        'avatar'
     ];
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo('App\User');
     }
-
- 
 }
