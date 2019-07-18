@@ -13,6 +13,8 @@ use Illuminate\Validation\Rule;
 
 use App\Http\Requests\PostUpdateFormRequest;
 use App\Http\Requests\PostStoreFormRequest;
+use Gate;
+use Auth;
 
 class PostController extends Controller
 {
@@ -69,15 +71,34 @@ class PostController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    // public function create()
+    // {
+    //     // dd(\Auth::id());
+        
+    //     $categories = Category::all(); 
+    //     $tags = \App\Tag::all();//get()->pluck('name', 'id');
+    //     $status = PostStatusType::toSelectArray();
+        
+    //     return view('admin.posts.create')->withStatus($status)->withCategories($categories)->withTitle('Posts management')->withBreadcrumbItem('Add New Post')->withTags($tags);
+    // }
+
     public function create()
     {
-        // dd(\Auth::id());
-        
-        $categories = Category::all(); 
-        $tags = \App\Tag::all();//get()->pluck('name', 'id');
-        $status = PostStatusType::toSelectArray();
-        
-        return view('admin.posts.create')->withStatus($status)->withCategories($categories)->withTitle('Posts management')->withBreadcrumbItem('Add New Post')->withTags($tags);
+        $user = \Auth::user();
+        if ($user->can('create', Post::class)) {
+            $categories = Category::all(); 
+            $status = PostStatusType::toSelectArray(); 
+            $tags = \App\Tag::all();//get()->pluck('name', 'id');
+            return view('admin.posts.create')->withStatus($status)->withCategories($categories)->withTags($tags)->withTitle('Posts management')->withBreadcrumbItem('Add New Post');
+        } else {
+            return redirect(route('posts.index'))->with('warning','You can not create post');
+        }
+        // if ($this->authorize('create', Post::class)) {
+        //     echo 'Current logged in user is allowed to create new posts.';
+        // } else {
+        //     echo 'You can not create post';
+        // }
+        // exit;
     }
 
     /**
@@ -90,7 +111,7 @@ class PostController extends Controller
     public function store(PostStoreFormRequest $request)
     {
         $userId = \Auth::id() ?? 1;
-
+        
         $post = Post::firstOrCreate(['title' => $request->title, 'content'=>$request->content, 'status'=>$request->status, 'category_id'=>$request->category_id, 'user_id'=>$userId]);
         $post->tags()->sync((array)$request->input('tag'));  
         return redirect()->route('posts.index')->with('success','Post created successfully');;
@@ -105,8 +126,17 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        // dump($post);
-        // return view('admin.posts.show',compact('post'));
+        $user = \Auth::user();
+        if ($this->authorize('view', $post)) {
+            return view('admin.posts.show',compact('post'));
+        } else {
+            return redirect(route('posts.index'))->with('warning','Not Allowed View Post');
+        }
+        // if ($user->can('view', $post)) {
+        //   echo "Current logged in user is allowed to update the Post: {$post->title}";
+        // } else {
+        //   echo 'Not Authorized.';
+        // }
     }
 
     public function getFirstPublished()
@@ -128,12 +158,25 @@ class PostController extends Controller
      * @param  \App\Post  $post
      * @return \Illuminate\Http\Response
      */
+    // public function edit(Post $post)
+    // {
+    //     $categories = Category::pluck('name', 'id'); 
+    //     $status = PostStatusType::toSelectArray(); 
+    //     $tags = \App\Tag::get()->pluck('name', 'id');
+    //     return view('admin.posts.edit')->withPost($post)->withStatus($status)->withCategories($categories)->withTitle('Posts management')->withBreadcrumbItem('Edit Post')->withTags($tags);
+    // }
+
     public function edit(Post $post)
     {
-        $categories = Category::pluck('name', 'id'); 
-        $status = PostStatusType::toSelectArray(); 
-        $tags = \App\Tag::get()->pluck('name', 'id');
-        return view('admin.posts.edit')->withPost($post)->withStatus($status)->withCategories($categories)->withTitle('Posts management')->withBreadcrumbItem('Edit Post')->withTags($tags);
+        if (Gate::allows('update-post', $post)) {
+            $categories = Category::pluck('name', 'id'); 
+            $status = PostStatusType::toSelectArray();
+            $tags = \App\Tag::get()->pluck('name', 'id');
+            return view('admin.posts.edit')->withPost($post)->withStatus($status)->withCategories($categories)->withTags($tags)->withTitle('Posts management')->withBreadcrumbItem('Edit Post');
+        } else {
+            return redirect(route('posts.index'))->with('warning','Not Allowed Edit Post');
+        }
+        exit;
     }
 
     /**
@@ -146,7 +189,22 @@ class PostController extends Controller
 
     public function update(PostUpdateFormRequest $request, Post $post)
     {
-        $post->update(['title' => $request->title, 'content'=>$request->content, 'status'=>$request->status, 'category_id'=>$request->category_id, 'user_id'=>1]);
+        // $user = \Auth::user();
+        // if ($user->can('update', $post)) {
+        //     $post->updateOrCreate([
+        //         'title' => $request->title, 
+        //         'content'=>$request->content, 
+        //         'status'=>$request->status, 'category_id'=>$request->category_id, 
+        //         'user_id'=>Auth::id()
+        //         ]);
+        //     $post->tags()->sync((array)$request->input('tag'));
+        //     return redirect(route('posts.index'))->with('success','Post updated successfully');
+        // } else {
+        //     return redirect(route('posts.index'))->with('warning',"Current logged in user is allowed to update the Post: {$post->id}");
+        // }
+        
+        // dd($request);
+        $post->update(['title' => $request->title, 'content'=>$request->content, 'status'=>$request->status, 'category_id'=>$request->category_id, 'user_id'=>Auth::id()]);
         $post->tags()->sync((array)$request->input('tag'));
         return redirect()->route('posts.index')->with('success','Post updated successfully');
     }
@@ -158,11 +216,34 @@ class PostController extends Controller
      * @param  \App\Post  $post
      * @return \Illuminate\Http\Response
      */
+    // public function destroy(Post $post)
+    // {
+    //     $post->tags()->detach();
+    //     $post->delete();
+    //     return redirect()->route('posts.index')
+    //             ->with('success','Post deleted successfully');
+    // }
+
     public function destroy(Post $post)
     {
-        $post->tags()->detach();
-        $post->delete();
-        return redirect()->route('posts.index')
-                ->with('success','Post deleted successfully');
+        $user = Auth::user();
+        
+        if ($user->can('delete', $post)) {
+            $post->tags()->detach();
+            $post->delete();
+            return redirect()->route('posts.index')->with('success','Post deleted successfully');
+        } else {
+            return redirect()->route('posts.index')->with('warning','Пользователь '.$user->name.' не может удалять статью...');
+        }
+        
+        // if (Gate::forUser($user)->denies('destroy-post', $post)) {
+        //     // Пользователь не может удалять статью...
+        //     // dd('Пользователь '.$user->name.' не может удалять статью...');
+        //     return redirect()->route('posts.index')->with('warning','Пользователь '.$user->name.' не может удалять статью...');
+        // } else {
+        // $post->tags()->detach();
+        // $post->delete();
+        // return redirect()->route('posts.index')->with('type','success')->with('message','Post deleted successfully');
+        // }
     }
 }

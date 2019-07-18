@@ -67,6 +67,26 @@
                         <div class="alert alert-danger">{{ $message }}</div>
                     @enderror
                 </div>
+
+                <div class="form-group {{ $errors->has('roles') ? 'has-error' : '' }}">
+                    <label for="roles">Role name*
+                        <span class="btn btn-info btn-xs select-all">Select all</span>
+                        <span class="btn btn-info btn-xs deselect-all">Deselect all</span>
+                    </label>
+                    <select name="roles[]" id="roles" class="form-control select2" multiple="multiple">
+                        @foreach($roles as $id => $roles)
+                            <option value="{{ $id }}" {{ (in_array($id, old('roles', [])) || isset($user) && $user->roles->contains($id)) ? 'selected' : '' }}>
+                                {{ $roles }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @if($errors->has('roles'))
+                        <p class="help-block">
+                            {{ $errors->first('roles') }}
+                        </p>
+                    @endif
+                    <p class="helper-block"></p>
+                </div>
     
             </div>
 
@@ -77,4 +97,21 @@
             </div>
         </div>
     </form>
+@endsection
+@section('scripts')
+    @parent
+    <script>
+        $(".select-all").click(function(){
+            $("#roles > option").prop("selected","selected");
+            $("#roles").trigger("change");
+        });
+        $(".deselect-all").click(function(){
+            $("#roles > option").prop("selected","");
+            $("#roles").trigger("change");
+        });
+
+        $(document).ready(function () {
+            $('.select2').select2();
+        });
+    </script>
 @endsection

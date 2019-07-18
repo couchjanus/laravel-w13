@@ -15,6 +15,7 @@ class UserStoreFormRequest extends BaseFormRequest
     public function authorize()
     {
         return true;
+        // return \Gate::allows('user_create');
     }
 
     /**
@@ -27,7 +28,14 @@ class UserStoreFormRequest extends BaseFormRequest
         return [
             'email' => 'required|email|unique:users',
             'name' => 'required|string|max:50',
-            'password' => 'required|min:8'
+            'password' => 'required|min:8',
+            'roles.*'  => [
+                'integer',
+            ],
+            'roles'    => [
+                'required',
+                'array',
+            ],
         ];
     }
     public function messages()
@@ -35,7 +43,8 @@ class UserStoreFormRequest extends BaseFormRequest
         return [
             'email.required' => 'Email is required!',
             'name.required' => 'Name is required!',
-            'password.required' => 'Password is required!'
+            'password.required' => 'Password is required!',
+            'roles.required' => 'Role is required!'
         ];
     }
     /**

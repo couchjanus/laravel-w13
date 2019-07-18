@@ -6,6 +6,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Hash;
 
 class User extends Authenticatable
 {
@@ -44,7 +45,10 @@ class User extends Authenticatable
      * @var array
      */
     protected $dates = [
+        'updated_at',
+        'created_at',
         'deleted_at',
+        'email_verified_at',
     ];
 
     /**
@@ -60,6 +64,13 @@ class User extends Authenticatable
         return $query->withTrashed()->where('id', $id)->first();       
     }
 
+    public function setPasswordAttribute($input)
+    {
+        if ($input) {
+            $this->attributes['password'] = app('hash')->needsRehash($input) ? Hash::make($input) : $input;
+        }
+    }
+
     public function profile()
     {
         return $this->hasOne(Profile::class);
@@ -68,6 +79,11 @@ class User extends Authenticatable
     public function social()
     {
         return $this->hasMany(Social::class);
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
     }
 
 }

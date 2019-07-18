@@ -11,8 +11,9 @@ use Illuminate\Validation\Rule;
 
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\UserStoreFormRequest;
-
+use App\Http\Requests\UpdateUserRequest;
 use App\Profile;
+use App\Role;
 
 class UserController extends Controller
 {
@@ -23,8 +24,8 @@ class UserController extends Controller
      */
     public function index()
     {
+        abort_unless(\Gate::allows('user-access'), 403);
         $users = User::paginate(10);
-        // dump($users);
         return view('admin.users.index', ['users' => $users])->withTitle('Users Management')->withBreadcrumbItem('All Users');
     }
 
@@ -50,7 +51,10 @@ class UserController extends Controller
      */
     public function create()
     {
-        return view('admin.users.create')->withTitle('Users Management')->withBreadcrumbItem('Add User');
+        abort_unless(\Gate::allows('user-create'), 403);
+
+        $roles = Role::all()->pluck('name', 'id');
+        return view('admin.users.create', compact('roles'))->withTitle('Users Management')->withBreadcrumbItem('Add User');
     }
 
     /**
@@ -62,16 +66,20 @@ class UserController extends Controller
     
     public function store(UserStoreFormRequest $request)
     {
+        abort_unless(\Gate::allows('user-create'), 403);
+
         $user = User::create([
             'name' => $request['name'],
             'email' => $request['email'],
             'password' => Hash::make($request['password']),
         ]);
-        
+    
+        $user->roles()->sync($request->input('roles', []));
+
         $profile = new Profile();
         $user->profile()->save($profile);
         
-        return redirect()->route('users.index')->with('success','User created successfully');;
+        return redirect()->route('users.index')->with('success','User created successfully');
     }
     /**
      * Display the specified resource.
@@ -81,7 +89,10 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        return view('admin.users.show')->withUser($user)->withTitle('Users Management')->withBreadcrumbItem('Show User');
+        abort_unless(\Gate::allows('user-show'), 403);
+
+        $user->load('roles');
+        return view('admin.users.show', compact('user'))->withUser($user)->withTitle('Users Management')->withBreadcrumbItem('Show User');
     }
 
     /**
@@ -92,17 +103,13 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        return view('admin.users.edit')->withUser($user)->withTitle('Users Management')->withBreadcrumbItem('Edit User');
+        abort_unless(\Gate::allows('user-edit'), 403);
+
+        $roles = Role::all()->pluck('name', 'id');
+        $user->load('roles');
+        return view('admin.users.edit', compact('roles', 'user'))->withTitle('Users Management')->withBreadcrumbItem('Edit User');
     }
  
-    // public function rules() {
-    //    return [
-    //         'email' => ['required', 'string', 'email', 'max:255',
-    //             Rule::unique('users')->ignore($this->user),
-    //         ],
-    //     ];
-    // }
-
     /**
      * Update the specified resource in storage.
      *
@@ -110,19 +117,13 @@ class UserController extends Controller
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        $this->validate($request, [
-            'name' => ['required', 'string', 'max:255'],
-            'password' => ['required', 'string', 'min:8'],
-            'email' => [
-                'required', 'string', 'email', 'max:255',
-                Rule::unique('users')->ignore($user->id),
-            ],
-        ]);
+        abort_unless(\Gate::allows('user-edit'), 403);
 
         $user->update($request->all());
-        return redirect()->route('users.index');
+        $user->roles()->sync($request->input('roles', []));
+        return redirect()->route('users.index')->with('success','User updated successfully');
     }
 
     /**
@@ -133,23 +134,15 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        $user->delete();
-        return redirect()->route('users.index');
-    }
+        abort_unless(\Gate::allows('user-delete'), 403);
 
-    // public function userDestroy($id)
-    // {
-    //     $user = User::withTrashed()
-    //             ->findOrFail($id);
-    //     // dd($user);
-    //     $user->forceDelete();
-    //     return redirect()->route('users.index');
-    
-    // }
+        $user->delete();
+        return redirect()->route('users.index')->with('success','User deleted successfully');
+    }
 
     public function userDestroy($id)
     {
         User::trash($id)->forceDelete();
-        return redirect()->route('users.index');
+        return redirect()->route('users.index')->with('success','User force deleted successfully');
     }
 }

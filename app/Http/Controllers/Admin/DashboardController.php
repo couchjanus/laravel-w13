@@ -7,9 +7,19 @@ use App\Http\Controllers\Controller;
 
 class DashboardController extends Controller
 {
-    public function index()
+    // public function index()
+    // {
+    //     return view('admin.index');
+    // }
+
+    public function __construct()
     {
-        return view('admin.index');
+        // $this->middleware('auth:admin');
+    }
+    
+    public function __invoke()      
+    {
+        return view('admin.index')->withTitle('Dashboard Page');
     }
 
 }

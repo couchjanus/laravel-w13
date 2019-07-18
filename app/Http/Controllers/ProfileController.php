@@ -84,4 +84,11 @@ class ProfileController extends Controller
 
         return redirect()->route('home');
     }
+
+    public function list()
+    {
+        $posts = Post::latest()->where('user_id', Auth::id())->paginate(5);
+        return view('blog.list',compact('posts'));
+    }
+ 
 }
