@@ -33,6 +33,5 @@
       </div>
       {{-- comments --}}
       @includeWhen($hasComments, 'blog.partials._comments', ['some' => 'data'])
-      {{-- @include('blog.partials._comments') --}}
     </div>
   </div>

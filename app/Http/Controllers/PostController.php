@@ -15,10 +15,11 @@ class PostController extends Controller
 
     public function index()
     {
-        $posts = Post::where([
-            'status' => PostStatusType::Published])->paginate();
+        $posts = Post::withCount('comments')->where([
+            'status' => PostStatusType::Published])->orderBy('updated_at', 'desc')->paginate();
         return view('blog.index', compact('posts'))->withTitle('Peculiar Blog');
     }
+
 
     public function show($slug)
     {
@@ -28,7 +29,11 @@ class PostController extends Controller
         }
         
         $post = Post::whereSlug($slug)->firstOrFail();
-        return view('blog.show', ['post' => $post, 'hasComments'=>true]);
+        
+        $hasComments = $post::has('comments') ? true : false;
+        
+        return view('blog.show')->withPost($post)->withHasComments($hasComments);
+   
     }
 
     public function getPostsByCategory($categoryId)

@@ -21,7 +21,8 @@
               <div class="title"><span>{{ $post->user->name }}</span></div>
             </a>
             <div class="date"><i class="fas fa-clock"></i> 2 months ago</div>
-            <div class="comments meta-last"><i class="fas fa-comment"></i> 12</div>
+            <div class="comments meta-last"><i class="fas fa-comment"></i> {{ $post->comments_count }}</div>
+
           </footer>
         </div>
       </div>

@@ -23,7 +23,7 @@
 @endsection
 
 @section('main')                    
-    <div class="container">
+    <div class="container" id="app">
       <div class="row">
         <!-- Latest Posts -->
         <main class="posts-listing col-lg-8"> 

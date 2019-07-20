@@ -80,3 +80,17 @@ Route::middleware('web')->group(function () {
 // Socialite Register Routes
 Route::get('social/{provider}', 'Auth\SocialController@redirect')->name('social.redirect');
 Route::get('social/{provider}/callback', 'Auth\SocialController@callback')->name('social.callback');
+
+Route::get('vue', function () {
+    return view('vue');
+});
+
+// Route::post(
+//     'post/{id}/comment',
+//     function ($id, Request $request) {
+//         $user = \Auth::user();
+//         // dump($request);
+//         \App\Post::findOrFail($id)->comment($request->all(), $user);
+//         return response()->json([$request->all()]);
+//     }
+// );

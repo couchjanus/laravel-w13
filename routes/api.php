@@ -16,3 +16,25 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::group(
+    ['middleware' => 'api'],
+    function () {
+        Route::get(
+            'post/{id}/comments',
+            function ($id) {
+                return \App\Post::findOrFail($id)->comments;
+            }
+        );
+
+        Route::post(
+            '/comment',
+            function (Request $request) {
+                $user = \App\User::find($request->user_id);
+                $post = \App\Post::find($request->post_id);
+                $post->comment($request->comment, $user);
+                return response()->json('ok');
+            }
+        );
+    }
+);

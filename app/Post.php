@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use App\Scopes\TitleScope;
 use Cviebrock\EloquentSluggable\Sluggable;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use App\Comment;
 
 class Post extends Model
 {
@@ -19,13 +21,6 @@ class Post extends Model
 
     public $timestamps = true;
    
-    // global scopes
-    // protected static function boot()
-    // {
-    //     parent::boot();
-    //     static::addGlobalScope(new TitleScope);
-    // }
-
     use Sluggable;
 
     /**
@@ -70,5 +65,19 @@ class Post extends Model
         return $this->belongsToMany(Tag::class);
     }
 
+    // public function comments()
+    // {
+    //     return $this->morphMany(Comment::class, 'commentable');
+    // }
+
+    public function comments(): MorphMany
+    {
+        return $this->morphMany(Comment::class, 'commentable')->with('creator');
+    }
+
+    public function comment($data, Model $creator): Comment
+    {
+        return (new Comment())->createComment($this, $data, $creator);
+    }
 
 }
