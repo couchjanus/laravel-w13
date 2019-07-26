@@ -196,6 +196,8 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\GadgetServiceProvider::class,
+        App\Providers\ArticleServiceProvider::class,
+        App\Providers\ElasticsearchServiceProvider::class,
 
     ],
 

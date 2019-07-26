@@ -24,7 +24,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        abort_unless(\Gate::allows('user-access'), 403);
+        // abort_unless(\Gate::allows('user-access'), 403);
         $users = User::paginate(10);
         return view('admin.users.index', ['users' => $users])->withTitle('Users Management')->withBreadcrumbItem('All Users');
     }

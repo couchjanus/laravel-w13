@@ -4,13 +4,17 @@
             <header>
               <h3 class="h6">Search the blog</h3>
             </header>
-            <form action="#" class="search-form">
+          
+            <form action="#" class="search-form"  action="{{ url('/search') }}" method="get">
               <div class="form-group">
-                <input type="search" placeholder="What are you looking for?">
-                <button type="submit" class="submit"><i class="icon-search"></i></button>
+                <input type="search" placeholder="What are you looking for?"  name="q" value="{{ request('q') }}">
+                <button type="submit" class="submit"><i class="icon-search"></i>Go!</button>
               </div>
             </form>
+          
           </div>
+
+
           <!-- Widget [Latest Posts Widget]        -->
           <div class="widget latest-posts">
             <header>

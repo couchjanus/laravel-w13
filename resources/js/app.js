@@ -8,7 +8,8 @@ require('./bootstrap');
 // import moment from 'moment';
 
 window.Vue = require('vue');
-
+import InstantSearch from 'vue-instantsearch';
+Vue.use(InstantSearch);
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue

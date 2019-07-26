@@ -1,4 +1,5 @@
 <?php
+use Illuminate\Support\Facades\Input;
 
 Route::get('/', function () {
     return view('welcome');
@@ -43,7 +44,19 @@ Route::prefix('admin')->group(function () {
     Route::delete('writer-destroy/{id}', 'Admin\WriterController@userDestroy')->name('writer.force.destroy');
     Route::post('restore-admin/{id}', 'Admin\AdminController@restore')->name('admins.restore');
     Route::post('restore-writer/{id}', 'Admin\WriterController@restore')->name('writers.restore');
+
+    Route::any('users/search',function(){
+        $q = Input::get ( 'q' );
+        $users = App\User::where('name','LIKE','%'.$q.'%')->orWhere('email','LIKE','%'.$q.'%')->paginate();
+        if(count($users) > 0) {
+            return view('admin.users.index')->withUsers($users)->withQuery($q)->withTitle('Users Management')->withBreadcrumbItem('Search Users');
+        } else {
+              return redirect(route('users.index'))->withType('warning')->withMessage('No Details found. Try to search again !');
+        }
+    });
 });
+
+
 
 Route::get('/login/admin', 'Auth\LoginController@showAdminLoginForm')->name('login.admin');
 Route::get('/login/writer', 'Auth\LoginController@showWriterLoginForm');
@@ -81,16 +94,20 @@ Route::middleware('web')->group(function () {
 Route::get('social/{provider}', 'Auth\SocialController@redirect')->name('social.redirect');
 Route::get('social/{provider}/callback', 'Auth\SocialController@callback')->name('social.callback');
 
-Route::get('vue', function () {
-    return view('vue');
+
+Route::get('articles', 'ArticleController@index')->name('articles.index');
+Route::get('articles/{id}','ArticleController@show')->name('articles.show'); 
+
+use \App\Repositories\ElasticsearchArticleRepositoryInterface;
+
+Route::get('/search', function (ElasticsearchArticleRepositoryInterface $repository) {
+   
+   $articles = $repository->search((string) request('q'));
+
+//    dump($articles);
+   return view('articles.index', [
+       'posts' => $articles,
+       'title' => 'Awesome Blog'
+   ]);
 });
 
-// Route::post(
-//     'post/{id}/comment',
-//     function ($id, Request $request) {
-//         $user = \Auth::user();
-//         // dump($request);
-//         \App\Post::findOrFail($id)->comment($request->all(), $user);
-//         return response()->json([$request->all()]);
-//     }
-// );

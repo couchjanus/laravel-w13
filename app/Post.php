@@ -8,6 +8,8 @@ use App\Scopes\TitleScope;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use App\Comment;
+use Laravel\Scout\Searchable;
+
 
 class Post extends Model
 {
@@ -22,6 +24,7 @@ class Post extends Model
     public $timestamps = true;
    
     use Sluggable;
+    use Searchable;
 
     /**
      * Return the sluggable configuration array for this model.
